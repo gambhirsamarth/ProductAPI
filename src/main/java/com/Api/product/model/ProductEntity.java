@@ -12,13 +12,13 @@ public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "client_id")
+    @Column(name = "client_id", unique = true,nullable = false)
     private int clientId;
-    @Column(name = "sku_code")
+    @Column(name = "sku_code", unique = true, nullable = false)
     private int skuCode;
-    @Column(name="name")
+    @Column(name="name", nullable = false)
     private String name;
-    @Column(name="last_modified_date")
+    @Column(name="last_modified_date", nullable = false)
     private LocalDate lastModifiedDate;
 
     @Column(name = "enable")

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.Api</groupId>
-	<artifactId>ticket</artifactId>
+	<artifactId>product</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ticket</name>
-	<description>Project for TicketApi</description>
+	<name>product</name>
+	<description>Project for Product Api</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

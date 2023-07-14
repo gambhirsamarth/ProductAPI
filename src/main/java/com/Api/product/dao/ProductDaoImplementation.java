@@ -19,12 +19,12 @@ public class ProductDaoImplementation {
     @Autowired
     SessionFactory sessionFactory;
     public final static org.slf4j.Logger logger= LoggerFactory.getLogger(ProductDaoImplementation.class);
-
-    public List<ProductEntity> getAllProducts(int pageNo, int pageSize) {
+    public List<ProductEntity> getAllProducts(int pageNo) {
+        // get all the products using pagination
         Session session = sessionFactory.openSession();
-        int offset=(pageNo-1)*pageSize;
+        int pageSize = 20;
+        int offset=(pageNo-1)*pageSize;  // the number of records to be skipped for returning data of current page
         Query query = session.createQuery("FROM ProductEntity").setFirstResult(offset).setMaxResults(pageSize);
-        logger.info("All Products Listed");
         return query.getResultList();
     }
     public ProductEntity getProductById(int id) {
@@ -35,33 +35,28 @@ public class ProductDaoImplementation {
             List<ProductEntity> resultList = query.getResultList();
 
             if (resultList.isEmpty()) {
-                logger.warn("No product Found");
+                logger.info("No product Found");
                 return null;
             }
-            logger.info("Product with id: " + id + " listed");
             return resultList.get(0);
         }
         catch (Exception e){
-            logger.error(e.getMessage());
+            logger.info(e.getMessage());
             throw new IllegalStateException("No product Found");
         }
         finally {
             entityManager.close();
         }
     }
-
-
     public void addProduct(ProductEntity productEntity) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             session.saveOrUpdate(productEntity);
             session.getTransaction().commit();
-            logger.info("Product Added");
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.info(e.getMessage());
         }
     }
-
     public Optional<ProductEntity> getProductByCode(int skuCode) {
         Session session = sessionFactory.openSession();
         Query query = session.createQuery("FROM ProductEntity WHERE skuCode = :skuCode");
@@ -69,7 +64,6 @@ public class ProductDaoImplementation {
         List<ProductEntity> products = query.getResultList();
         return products.stream().findFirst();
     }
-
     public List<ProductEntity> getEnabledProducts(boolean enable) {
         Session session = sessionFactory.openSession();
         Query query = session.createQuery("FROM ProductEntity WHERE enable = :enable");

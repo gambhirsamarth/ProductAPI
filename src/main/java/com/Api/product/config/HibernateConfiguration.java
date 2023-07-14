@@ -47,7 +47,7 @@ public class HibernateConfiguration {
     @Bean(name = "sessionFactory")
     public SessionFactory getSessionFactory(DataSource dataSource) {
         LocalSessionFactoryBuilder sessionBuilder = new LocalSessionFactoryBuilder(dataSource);
-        sessionBuilder.scanPackages("com.Api.ticket.model");
+        sessionBuilder.scanPackages("com.Api.product.model");
         return sessionBuilder.buildSessionFactory();
     }
 
