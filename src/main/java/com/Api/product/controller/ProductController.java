@@ -1,5 +1,6 @@
 package com.Api.product.controller;
 
+import com.Api.product.dto.request.AddRequestDto;
 import com.Api.product.dto.response.ResponseDto;
 import com.Api.product.dto.response.ResponseListDto;
 import com.Api.product.model.ProductEntity;
@@ -30,5 +31,10 @@ public class ProductController {
     @GetMapping("/enable") // lists all the product by checking if its enable or disabled
     public ResponseListDto getEnabledProducts(@RequestParam(name = "status") boolean enable) {
         return productService.getEnabledProducts(enable);
+    }
+
+    @PostMapping("/add-or-update-products-by-kafka")
+    public ResponseDto addOrUpdateProductsByKafka(@RequestBody ProductEntity productEntity){
+        return productService.addOrUpdateProductsByKafka(productEntity);
     }
 }
