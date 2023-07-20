@@ -1,5 +1,6 @@
 package com.Api.product.service;
 
+import com.Api.product.cache.ProductCache;
 import com.Api.product.dao.ProductDaoImplementation;
 import com.Api.product.dto.request.AddRequestDto;
 import com.Api.product.dto.response.ResponseDto;
@@ -16,7 +17,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Service
 
@@ -32,10 +32,15 @@ public class ProductService {
 
     @Autowired
     Validate validate;
+
+    @Autowired
+    ProductCache productCache;
     final org.slf4j.Logger logger= LoggerFactory.getLogger(ProductDaoImplementation.class);
 
     @Autowired
     private KafkaTemplate<String, ProductEntity> kafkaTemplate;
+
+    @Autowired
     public static final String TOPIC ="Products";
     public ResponseEntity<ResponseListDto> getAllProducts(int pageNumber) {
         List<ProductEntity> data = new ArrayList<>();
@@ -75,21 +80,36 @@ public class ProductService {
         }
     }
     public ResponseDto getProductById(int id) {
-        ProductEntity productEntity = productDaoImplementation.getProductById(id);
-        if(productEntity==null){
-            responseDto.setMessage("Please enter a valid Id");
-            logger.error("Error, Invalid Id");
-            responseDto.setStatus(false);
-            responseDto.setData(null);
-            return responseDto;
-        }
-        else {
-            responseDto.setMessage("Found the product with given Id");
-            logger.info("Product with Id: " + id + " listed");
+        ProductEntity productEntity;
+        productEntity = productCache.getTicketById(id);
+
+
+        if(productEntity!=null) {
+            responseDto.setMessage("Found in cache");
             responseDto.setStatus(true);
             responseDto.setData(productEntity);
-            return responseDto;
         }
+
+        else {
+            // if not present in cache, search in database
+            productEntity = productDaoImplementation.getProductById(id);
+
+            // if not found in database as well, ask for valid id
+            if (productEntity == null) {
+                responseDto.setMessage("Please enter a valid Id");
+                logger.error("Error, Invalid Id");
+                responseDto.setStatus(false);
+                responseDto.setData(null);
+                return responseDto;
+            } else {
+                responseDto.setMessage("Found in Database");
+                logger.info("Product with Id: " + id + " listed");
+                responseDto.setStatus(true);
+                responseDto.setData(productEntity);
+                productCache.putProductEntityToCache(productEntity);
+            }
+        }
+        return responseDto;
     }
     public ResponseListDto getEnabledProducts(boolean enable){
         // list all the products based on enable or disabled

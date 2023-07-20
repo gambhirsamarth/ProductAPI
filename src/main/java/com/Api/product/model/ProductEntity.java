@@ -2,13 +2,14 @@ package com.Api.product.model;
 
 import lombok.Data;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
 @Entity
 @Table(name = "product")
 
-public class ProductEntity {
+public class ProductEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
