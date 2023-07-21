@@ -43,9 +43,12 @@ public class ProductService {
     @Autowired
     public static final String TOPIC ="Products";
     public ResponseEntity<ResponseListDto> getAllProducts(int pageNumber) {
+
         List<ProductEntity> data = new ArrayList<>();
         int pageSize = 20;
+
         try{
+            // if pageNumber is less than or zero, its invalid input
             if(pageNumber<=0){
                 responseListDto.setMessage("Invalid Input");
                 responseListDto.setStatus(false);
@@ -53,6 +56,20 @@ public class ProductService {
                 logger.error("Invalid Input for page number");
                 return new ResponseEntity<>(responseListDto,HttpStatus.BAD_GATEWAY);
             }
+
+            // fetch data from cache
+            data = productCache.getAllProducts(pageNumber);
+
+            // if data is not null,  return it
+            if(data.size()!=0){
+                responseListDto.setMessage("Products Found in Cache");
+                responseListDto.setData(data);
+                responseListDto.setStatus(true);
+                logger.info("Products Listed from Cache");
+                return new ResponseEntity<>(responseListDto, HttpStatus.ACCEPTED);
+            }
+
+            // else get from database
             else {
                 List<ProductEntity> values = productDaoImplementation.getAllProducts(pageNumber);
                 if(values!=null && values.size()>0){
@@ -60,6 +77,7 @@ public class ProductService {
                     responseListDto.setStatus(true);
                     responseListDto.setData(values);
                     logger.info("Got All the products in the table");
+                    productCache.productListToCache(pageNumber, values);
                     return new ResponseEntity<>(responseListDto, HttpStatus.ACCEPTED);
                 }
                 else{
@@ -81,7 +99,7 @@ public class ProductService {
     }
     public ResponseDto getProductById(int id) {
         ProductEntity productEntity;
-        productEntity = productCache.getTicketById(id);
+        productEntity = productCache.getProductById(id);
 
 
         if(productEntity!=null) {
