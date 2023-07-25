@@ -29,22 +29,14 @@ public class ProductCache {
     }
     public void putProductEntityToCache(ProductEntity product){
         RMap<String, ProductEntity> map = client.getMap(PRODUCT_ID_TO_PRODUCT_MAP);
-        map.put(String.valueOf(product.getId()), product);
-    }
 
-    public List<ProductEntity> getAllProducts(int pageNumber){
-        RMap<String, List<ProductEntity>> map = client.getMap(PAGE_NUMBER_TO_PRODUCTS_MAP);
-
-        List<ProductEntity> products = new ArrayList<>();
-
-        if(map.containsKey(String.valueOf(pageNumber)))
-            products = map.get(String.valueOf(pageNumber));
-
-        return products;
-    }
-
-    public void productListToCache(int pageNumber , List<ProductEntity> products){
-        RMap<String, List<ProductEntity>> map = client.getMap(PAGE_NUMBER_TO_PRODUCTS_MAP);
-        map.put(String.valueOf(pageNumber), products);
+        // if already exists in the cache, update its value
+        if(map.containsKey(String.valueOf(product.getId()))){
+            map.replace(String.valueOf(product.getId()), product);
+        }
+        // else add into the cache
+        else {
+            map.put(String.valueOf(product.getId()), product);
+        }
     }
 }

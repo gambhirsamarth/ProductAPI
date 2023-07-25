@@ -24,13 +24,15 @@ public class ProductDaoImplementation {
         Session session = sessionFactory.openSession();
         int pageSize = 20;
         int offset=(pageNo-1)*pageSize;  // the number of records to be skipped for returning data of current page
-        Query query = session.createQuery("FROM ProductEntity").setFirstResult(offset).setMaxResults(pageSize);
+        String hql = "FROM ProductEntity";
+        Query query = session.createQuery(hql).setFirstResult(offset).setMaxResults(pageSize);
         return query.getResultList();
     }
     public ProductEntity getProductById(int id) {
         EntityManager entityManager = sessionFactory.createEntityManager();
         try {
-            TypedQuery<ProductEntity> query = entityManager.createQuery("SELECT t FROM ProductEntity t WHERE t.id = :id", ProductEntity.class);
+            String hql = "SELECT t FROM ProductEntity t WHERE t.id = :id";
+            TypedQuery<ProductEntity> query = entityManager.createQuery(hql, ProductEntity.class);
             query.setParameter("id", id);
             List<ProductEntity> resultList = query.getResultList();
 
@@ -59,14 +61,16 @@ public class ProductDaoImplementation {
     }
     public Optional<ProductEntity> getProductByCode(int skuCode) {
         Session session = sessionFactory.openSession();
-        Query query = session.createQuery("FROM ProductEntity WHERE skuCode = :skuCode");
+        String hql = "FROM ProductEntity WHERE skuCode = :skuCode";
+        Query query = session.createQuery(hql);
         query.setParameter("skuCode", skuCode);
         List<ProductEntity> products = query.getResultList();
         return products.stream().findFirst();
     }
     public List<ProductEntity> getEnabledProducts(boolean enable) {
         Session session = sessionFactory.openSession();
-        Query query = session.createQuery("FROM ProductEntity WHERE enable = :enable");
+        String hql = "FROM ProductEntity WHERE enable = :enable";
+        Query query = session.createQuery(hql);
         query.setParameter("enable", enable);
         List<ProductEntity> products = query.getResultList();
         return products;

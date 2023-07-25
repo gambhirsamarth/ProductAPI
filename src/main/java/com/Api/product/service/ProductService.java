@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
 public class ProductService {
     @Autowired
     private ProductDaoImplementation productDaoImplementation;
@@ -57,19 +56,7 @@ public class ProductService {
                 return new ResponseEntity<>(responseListDto,HttpStatus.BAD_GATEWAY);
             }
 
-            // fetch data from cache
-            data = productCache.getAllProducts(pageNumber);
-
-            // if data is not null,  return it
-            if(data.size()!=0){
-                responseListDto.setMessage("Products Found in Cache");
-                responseListDto.setData(data);
-                responseListDto.setStatus(true);
-                logger.info("Products Listed from Cache");
-                return new ResponseEntity<>(responseListDto, HttpStatus.ACCEPTED);
-            }
-
-            // else get from database
+            // else get result from database
             else {
                 List<ProductEntity> values = productDaoImplementation.getAllProducts(pageNumber);
                 if(values!=null && values.size()>0){
@@ -77,7 +64,6 @@ public class ProductService {
                     responseListDto.setStatus(true);
                     responseListDto.setData(values);
                     logger.info("Got All the products in the table");
-                    productCache.productListToCache(pageNumber, values);
                     return new ResponseEntity<>(responseListDto, HttpStatus.ACCEPTED);
                 }
                 else{
@@ -168,6 +154,8 @@ public class ProductService {
                 responseDto.setData(productEntity);
                 responseDto.setStatus(true);
 
+                // update in cache
+                productCache.putProductEntityToCache(productEntity);
                 logger.info("Product Updated!");
                 return  responseDto;
             }
@@ -186,6 +174,8 @@ public class ProductService {
                     responseDto.setData(productEntity);
                     responseDto.setStatus(true);
 
+                    // add in cache
+                    productCache.putProductEntityToCache(productEntity);
                     logger.info("Product Added!");
                 }
                 // if clientId or skuCode are not unique, throw error
@@ -231,6 +221,9 @@ public class ProductService {
                 product.setLastModifiedDate(LocalDate.now());
                 productDaoImplementation.addProduct(product);
 
+                // update in cache
+                productCache.putProductEntityToCache(productEntity);
+
                 responseDto.setMessage("Product Updated");
                 responseDto.setData(productEntity);
                 responseDto.setStatus(true);
@@ -251,7 +244,9 @@ public class ProductService {
                     responseDto.setMessage("Product Added");
                     responseDto.setData(productEntity);
                     responseDto.setStatus(true);
-                    kafkaTemplate.send("Product", productEntity); // ***
+                    kafkaTemplate.send("Product", productEntity);
+                    // add to cache
+                    productCache.putProductEntityToCache(productEntity);
                     logger.info("Product Added!");
                 }
                 // if clientId or skuCode are not unique, throw error
