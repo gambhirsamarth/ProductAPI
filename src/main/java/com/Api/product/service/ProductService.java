@@ -43,9 +43,6 @@ public class ProductService {
     public static final String TOPIC ="Products";
     public ResponseEntity<ResponseListDto> getAllProducts(int pageNumber) {
 
-        List<ProductEntity> data = new ArrayList<>();
-        int pageSize = 20;
-
         try{
             // if pageNumber is less than or zero, its invalid input
             if(pageNumber<=0){
